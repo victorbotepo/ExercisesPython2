@@ -1,29 +1,26 @@
 {
-    "DATABASECONN_CUSTOMER_CDAUSADESVB":
-        {
+    "DATABASECONN_CUSTOMER_CDAUSADESVB":{
             "IP":"10.110.7.25",
             "PORT":"1521",
             "USER":"CDAUSADESVB",
             "PASSWORD":"CDAUSADESVB",
             "SERVICENAME":"cmddev",
-            "SID":""
-        },
-    "DATABASECONN_CUSTOMER_CDACOLDESVB":
-        {
+            "SID":""},
+    "DATABASECONN_CUSTOMER_CDACOLDESVB":{
             "IP":"10.77.12.44",
             "PORT":"1521",
             "USER":"CDACOLDESVB",
             "PASSWORD":"Argos2019*",
             "SERVICENAME":"",
-            "SID":"ARGOS"
-        },
-        "DATABASECONN_CUSTOMER_CDACOLDE":
-            {
+            "SID":"ARGOS"},
+        "DATABASECONN_CUSTOMER_CDACOLDE":{
                 "IP":"10.77.12.44",
                 "PORT":"1521",
                 "USER":"CDACOLDE",
                 "PASSWORD":"webcolca",
                 "SERVICENAME":"",
-                "SID":"ARGOS"
-            }
+            "SID":"ARGOS"},
+    "PARAM_GRABAR_EXCEL":{"RUTA_GRABACION":"D:\\Personal\\Python\\EjerciciosCalidadArgos\\rutaGrabaExcel",
+                            "STYLE_TITTLE":"pattern: pattern solid, fore_colour custom_colour",
+                            "STYLE_RESTANT":"font: bold 1"}
 }
