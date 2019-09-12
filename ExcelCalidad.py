@@ -1,11 +1,12 @@
 import json
 import xlwt 
 from xlwt import Workbook 
+from datetime import datetime
 
 class ExcelCalidadArgos():
     def __init__(self,ruta, nombreArchivo):
         self.ruta = ruta
-        self.nombreArchivo = nombreArchivo
+        self.nombreArchivo = nombreArchivo+str(datetime.now().strftime("%d-%m-%Y %H_%M_%S"))
         self.wb = Workbook()
         self.save_workbook
         self.sheet = None
@@ -42,7 +43,7 @@ class ExcelCalidadArgos():
 
         if len(style) > 0:
             xlwt.add_palette_colour("custom_colour", 0x21)
-            self.wb.set_colour_RGB(0x21, 0, 103, 132)
+            self.wb.set_colour_RGB(0x21, 200, 200, 100)
             l_style = xlwt.easyxf(style) 
             self.sheet.write(row, column, content, l_style) 
         else:

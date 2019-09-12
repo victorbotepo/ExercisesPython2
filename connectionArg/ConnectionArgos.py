@@ -54,4 +54,15 @@ class connectionArgosPortal():
         table_created = self.cur.callfunc('WEB_ORDER_TESTING.get_table_name_created',str,[code_gen,codigo_cal, codigo_esc_cal, linea ])
         return table_created
     
+    def convert_clob_to_str_cx_oracle(self, datas):
+        for i in range(len(datas)):
+            temp_data = []
+            for data in datas[i]:
+                
+                if isinstance(data, cx_Oracle.LOB) :
+                    data = str(data)
+                temp_data.append(data)
 
+            datas[i] = temp_data
+
+        return datas

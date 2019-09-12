@@ -37,6 +37,10 @@ class facadeCalidad:
         print(num_generated_token)
         return num_generated_token
 
+    def __convert_clob_to_str_cx_oracle(self, datas):
+        converted_data = self.con.convert_clob_to_str_cx_oracle(datas)
+        return converted_data
+
     def execute_val_calidad(self,num_gen_code):
         table_created = ''
         codigo_cal = 0
@@ -96,6 +100,7 @@ class facadeCalidad:
 
         sheet_name = str(codigo_cal)+'_'+str(codigo_esc_cal)+'_'+str(linea)+'_'+str(num_token_gen)
 
+        list_data = self.__convert_clob_to_str_cx_oracle(list_data)
         self.ExcelFile.add_sheet(sheet_name, list_columns, list_data, self.config["PARAM_GRABAR_EXCEL"]["STYLE_TITTLE"], desc_Validacion)
 
         print(type(list_data))
@@ -131,7 +136,7 @@ try:
     GeneradeCode = insInvoke.execute_test_take(1)
     #listResult = insInvoke.execute_val_calidad(GeneradeCode)
     insInvoke.execute_val_calidad(GeneradeCode)
-    #insInvoke.execute_val_calidad(601)
+    #insInvoke.execute_val_calidad(1141)
     li_="END"
     print(li_)
 
