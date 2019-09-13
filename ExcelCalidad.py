@@ -1,12 +1,14 @@
 import json
 import xlwt 
 from xlwt import Workbook 
-from datetime import datetime
+import xlsxwriter
+
+
 
 class ExcelCalidadArgos():
     def __init__(self,ruta, nombreArchivo):
         self.ruta = ruta
-        self.nombreArchivo = nombreArchivo+str(datetime.now().strftime("%d-%m-%Y %H_%M_%S"))
+        self.nombreArchivo = nombreArchivo
         self.wb = Workbook()
         self.save_workbook
         self.sheet = None

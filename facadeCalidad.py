@@ -1,7 +1,8 @@
 import json
 import ExcelCalidad
-from datetime import date
-#import connectionArg
+import threading
+import logging
+from datetime import datetime
 from connectionArg import ConnectionArgos
 #import connectionArg.ConnectionArgos.ConnectionArgos
 
@@ -27,7 +28,8 @@ class facadeCalidad:
                                                         self.config[eti_database]["SID"])
         print("despues de connect to portal")
         self.cur = self.con.get_cursor
-        self.ExcelFile = None   
+        self.ExcelFile = None 
+        self.threads = None  
 
     def get_parametrosGenerales(self):
         return self.config
@@ -51,11 +53,14 @@ class facadeCalidad:
             l_cur_load_ini = self.con.l_resultVal1
 
             graboExcel = False
-
+            self.threads = list()
+            ind = 0
             #l_cur_load_ini = list(l_cur_load_ini)
             for row in l_cur_load_ini:
                     #row_c = list(row)
                 print( row)
+                ind =+1
+                print(ind)
                 print(row[0]) #codigo_cal
                 codigo_cal = int(row[0])
                 if graboExcel == False:
@@ -72,7 +77,13 @@ class facadeCalidad:
                 print(row[4]) #desc_val
                 desc_Validacion = row[4]
 
-                cursorSentences = self.execute_fetch_sentence_DB(codigo_cal, codigo_esc_cal, linea, num_token_gen)
+                '''x = threading.Thread(target=self.execute_one_val_calidad, args=(codigo_cal, codigo_esc_cal, linea, num_token_gen, num_gen_code, desc_Validacion))
+                self.threads.append(x)
+                x.start()'''
+
+                self.execute_one_val_calidad(codigo_cal, codigo_esc_cal, linea, num_token_gen, num_gen_code, desc_Validacion)
+
+                '''cursorSentences = self.execute_fetch_sentence_DB(codigo_cal, codigo_esc_cal, linea, num_token_gen)
                 headers = [i[0] for i in cursorSentences.description]
                 self.list_load_ini = list(cursorSentences)
                 
@@ -82,15 +93,37 @@ class facadeCalidad:
 
                 self.con.execute_sentence_drop_table_DB(codigo_cal, codigo_esc_cal)
 
-                self.execute_commit()
+                self.execute_commit()'''
 
+            '''for index, thread in enumerate(self.threads):
+                logging.info("Main    : before joining thread %d.", index)
+                thread.join()
+            '''
+            
         except Exception as e:
             print(e)
             if len(table_created) > 0 and codigo_cal > 0 and codigo_esc_cal >0:
                 codigo_cal
                 self.con.execute_sentence_drop_table_DB(codigo_cal, codigo_esc_cal)
 
+    def execute_every_fecth_sentence_DB(self,codigo_cal, codigo_esc_cal, linea, num_token_gen):
+        cursorSentences = self.execute_fetch_sentence_DB(codigo_cal, codigo_esc_cal, linea, num_token_gen)
+        headers = [i[0] for i in cursorSentences.description]
+        self.list_load_ini = list(cursorSentences)
+        return headers
+        
         #return self.con.execute_fetch(num_gen_code)
+    def execute_one_val_calidad(self, codigo_cal, codigo_esc_cal, linea, num_token_gen, num_gen_code, desc_Validacion):
+
+        headers = self.execute_every_fecth_sentence_DB(codigo_cal, codigo_esc_cal, linea, num_token_gen)
+        
+        table_created = self.con.exec_get_table_name_created(num_gen_code,codigo_cal, codigo_esc_cal, linea)
+
+        self.generate_excel(self.list_load_ini, num_gen_code, codigo_cal, codigo_esc_cal, linea, num_token_gen, table_created, headers, desc_Validacion)
+
+        self.con.execute_sentence_drop_table_DB(codigo_cal, codigo_esc_cal)
+
+        self.execute_commit()
 
     def execute_fetch_sentence_DB(self, codigo_cal, codigo_esc_cal, linea, num_token_gen):
             list_exec = self.con.execute_sentence_DB(codigo_cal, codigo_esc_cal, linea, num_token_gen)
@@ -101,6 +134,7 @@ class facadeCalidad:
         sheet_name = str(codigo_cal)+'_'+str(codigo_esc_cal)+'_'+str(linea)+'_'+str(num_token_gen)
 
         list_data = self.__convert_clob_to_str_cx_oracle(list_data)
+        
         self.ExcelFile.add_sheet(sheet_name, list_columns, list_data, self.config["PARAM_GRABAR_EXCEL"]["STYLE_TITTLE"], desc_Validacion)
 
         print(type(list_data))
@@ -111,9 +145,7 @@ class facadeCalidad:
 
 
     def create_excel(self, codigo_cal):
-        today = date.today()
-        d1 = today.strftime("%d_%m_%Y")
-        nom_archivo = str(codigo_cal)+'_'+str(d1)
+        nom_archivo = str(codigo_cal)+'_'+str(datetime.now().strftime("%d-%m-%Y %H_%M_%S"))
         self.ExcelFile = ExcelCalidad.ExcelCalidadArgos(self.config["PARAM_GRABAR_EXCEL"]["RUTA_GRABACION"], nom_archivo)
 
     def execute_commit(self):
