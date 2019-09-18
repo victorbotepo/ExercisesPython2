@@ -19,7 +19,6 @@ class connectionArgosPortal():
                 self.connection = cx_Oracle.connect(user+'/'+password+'@'+ip+'/'+servicename)
             else:
                 self.dsn_tns = cx_Oracle.makedsn(ip, 1521, sid)
-                print(self.dsn_tns)
                 self.connection = cx_Oracle.connect(user, password, self.dsn_tns) 
             self.cur = self.connection.cursor()
             self.l_cur_load_ini = None

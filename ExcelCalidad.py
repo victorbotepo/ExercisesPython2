@@ -30,8 +30,6 @@ class ExcelCalidadArgos():
 
         li_Row += 1
         for row in list_data:
-            print(row)
-            print(type(row))
             li_Column = 0
             for data in row:
                 self.add_write(li_Row, li_Column, data)

@@ -36,6 +36,8 @@ class facadeCalidad:
 
     def execute_test_take(self, test_code):
         num_generated_token = self.con.execute_test( test_code)
+        self.execute_commit()
+        print("despues de Ejecutar TAKE")
         print(num_generated_token)
         return num_generated_token
 
@@ -54,27 +56,25 @@ class facadeCalidad:
 
             graboExcel = False
             self.threads = list()
-            ind = 0
             #l_cur_load_ini = list(l_cur_load_ini)
             for row in l_cur_load_ini:
                     #row_c = list(row)
-                print( row)
-                ind =+1
-                print(ind)
-                print(row[0]) #codigo_cal
+
+                
+                #print(row[0]) #codigo_cal
                 codigo_cal = int(row[0])
                 if graboExcel == False:
                     self.create_excel(codigo_cal)
                     graboExcel = True
 
-                print(row[1]) #codigo_esc_cal
+                #print(row[1]) #codigo_esc_cal
                 codigo_esc_cal = int(row[1])
-                print(row[2]) #linea
+                #print(row[2]) #linea
                 linea = int(row[2])
-                print(row[3]) #num_token_gen
+                #print(row[3]) #num_token_gen
                 num_token_gen = int(row[3])
                 
-                print(row[4]) #desc_val
+                #print(row[4]) #desc_val
                 desc_Validacion = row[4]
 
                 '''x = threading.Thread(target=self.execute_one_val_calidad, args=(codigo_cal, codigo_esc_cal, linea, num_token_gen, num_gen_code, desc_Validacion))
@@ -137,9 +137,6 @@ class facadeCalidad:
         
         self.ExcelFile.add_sheet(sheet_name, list_columns, list_data, self.config["PARAM_GRABAR_EXCEL"]["STYLE_TITTLE"], desc_Validacion)
 
-        print(type(list_data))
-        print(len(list_data))
-
         self.ExcelFile.save_workbook()
 
 
@@ -167,10 +164,10 @@ try:
     insInvoke = facadeCalidad()
     GeneradeCode = insInvoke.execute_test_take(1)
     #listResult = insInvoke.execute_val_calidad(GeneradeCode)
+    #GeneradeCode = 2141
     insInvoke.execute_val_calidad(GeneradeCode)
     #insInvoke.execute_val_calidad(1141)
-    li_="END"
-    print(li_)
+    print("END")
 
 
 except Exception as other:
