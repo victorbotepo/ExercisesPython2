@@ -2,6 +2,7 @@ import json
 import ExcelCalidad
 import threading
 import logging
+import SaveExcelAsync
 from datetime import datetime
 from connectionArg import ConnectionArgos
 #import connectionArg.ConnectionArgos.ConnectionArgos
@@ -16,6 +17,7 @@ class facadeCalidad:
         self.serviceName = serviceName'''
         with open('configuration/configuration.json','r') as f:
             self.config = json.load(f)
+
         print("despues de Open configuration")
         #eti_database = 'DATABASECONN_CUSTOMER_CDAUSADESVB'
         eti_database = 'DATABASECONN_CUSTOMER_CDACOLDESVB'
@@ -27,7 +29,7 @@ class facadeCalidad:
                                                         self.config[eti_database]["SERVICENAME"], 
                                                         self.config[eti_database]["SID"])
         print("despues de connect to portal")
-        self.cur = self.con.get_cursor
+
         self.ExcelFile = None 
         self.threads = None  
 
@@ -54,21 +56,23 @@ class facadeCalidad:
             self.con.execute_cal_fetch_load_ini(num_gen_code)
             l_cur_load_ini = self.con.l_resultVal1
 
-            graboExcel = False
             self.threads = list()
+            th = []
+            li_row = 0
+            codigo_cal_ant = None
+            codigo_esc_cal_ant = None
+            l_Excel = None
             #l_cur_load_ini = list(l_cur_load_ini)
             for row in l_cur_load_ini:
+            #for i, enumerate(l_cur_load_ini.items())
                     #row_c = list(row)
-
                 
                 #print(row[0]) #codigo_cal
                 codigo_cal = int(row[0])
-                if graboExcel == False:
-                    self.create_excel(codigo_cal)
-                    graboExcel = True
 
                 #print(row[1]) #codigo_esc_cal
                 codigo_esc_cal = int(row[1])
+
                 #print(row[2]) #linea
                 linea = int(row[2])
                 #print(row[3]) #num_token_gen
@@ -77,11 +81,22 @@ class facadeCalidad:
                 #print(row[4]) #desc_val
                 desc_Validacion = row[4]
 
+                if  codigo_cal != codigo_cal_ant or codigo_esc_cal != codigo_esc_cal_ant:
+                    l_Excel = self.create_excel(codigo_cal, codigo_esc_cal)
+                
+                th.append(SaveExcelAsync.SaveExcelAsync(num_gen_code, codigo_cal, codigo_esc_cal, linea, self.config["PARAM_GRABAR_EXCEL"]["RUTA_GRABACION"], num_token_gen, desc_Validacion, l_Excel))
+                if not th[li_row].is_alive():
+                    th[li_row].start()
+                li_row += 1
+
+                codigo_cal_ant = codigo_cal
+                codigo_esc_cal_ant = codigo_esc_cal
+
                 '''x = threading.Thread(target=self.execute_one_val_calidad, args=(codigo_cal, codigo_esc_cal, linea, num_token_gen, num_gen_code, desc_Validacion))
                 self.threads.append(x)
                 x.start()'''
 
-                self.execute_one_val_calidad(codigo_cal, codigo_esc_cal, linea, num_token_gen, num_gen_code, desc_Validacion)
+                #self.execute_one_val_calidad(codigo_cal, codigo_esc_cal, linea, num_token_gen, num_gen_code, desc_Validacion)
 
                 '''cursorSentences = self.execute_fetch_sentence_DB(codigo_cal, codigo_esc_cal, linea, num_token_gen)
                 headers = [i[0] for i in cursorSentences.description]
@@ -95,10 +110,10 @@ class facadeCalidad:
 
                 self.execute_commit()'''
 
-            '''for index, thread in enumerate(self.threads):
+            for index, thread in enumerate(self.threads):
                 logging.info("Main    : before joining thread %d.", index)
                 thread.join()
-            '''
+            
             
         except Exception as e:
             print(e)
@@ -114,7 +129,7 @@ class facadeCalidad:
         
         #return self.con.execute_fetch(num_gen_code)
     def execute_one_val_calidad(self, codigo_cal, codigo_esc_cal, linea, num_token_gen, num_gen_code, desc_Validacion):
-
+        
         headers = self.execute_every_fecth_sentence_DB(codigo_cal, codigo_esc_cal, linea, num_token_gen)
         
         table_created = self.con.exec_get_table_name_created(num_gen_code,codigo_cal, codigo_esc_cal, linea)
@@ -141,9 +156,10 @@ class facadeCalidad:
 
 
 
-    def create_excel(self, codigo_cal):
-        nom_archivo = str(codigo_cal)+'_'+str(datetime.now().strftime("%d-%m-%Y %H_%M_%S"))
+    def create_excel(self, codigo_cal, codigo_esc_cal):
+        nom_archivo = str(codigo_cal)+'_'+str(codigo_esc_cal)+'_'+str(datetime.now().strftime("%d-%m-%Y %H_%M_%S"))
         self.ExcelFile = ExcelCalidad.ExcelCalidadArgos(self.config["PARAM_GRABAR_EXCEL"]["RUTA_GRABACION"], nom_archivo)
+        return self.ExcelFile
 
     def execute_commit(self):
         self.con.connection.commit()
@@ -162,9 +178,9 @@ try:
 
 
     insInvoke = facadeCalidad()
-    GeneradeCode = insInvoke.execute_test_take(1)
+    #GeneradeCode = insInvoke.execute_test_take(1)
     #listResult = insInvoke.execute_val_calidad(GeneradeCode)
-    #GeneradeCode = 2141
+    GeneradeCode = 2481
     insInvoke.execute_val_calidad(GeneradeCode)
     #insInvoke.execute_val_calidad(1141)
     print("END")

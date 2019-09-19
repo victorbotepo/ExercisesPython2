@@ -16,10 +16,10 @@ class connectionArgosPortal():
             self.connection = None
             self.dsn_tns = None
             if self.servicename != '':
-                self.connection = cx_Oracle.connect(user+'/'+password+'@'+ip+'/'+servicename)
+                self.connection = cx_Oracle.connect(user+'/'+password+'@'+ip+'/'+servicename, threaded=True)
             else:
                 self.dsn_tns = cx_Oracle.makedsn(ip, 1521, sid)
-                self.connection = cx_Oracle.connect(user, password, self.dsn_tns) 
+                self.connection = cx_Oracle.connect(user, password, self.dsn_tns, threaded=True) 
             self.cur = self.connection.cursor()
             self.l_cur_load_ini = None
         except Exception as other:
